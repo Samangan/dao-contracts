@@ -1,0 +1,80 @@
+# Calculates the gas cost diff for each smart contract operation
+
+# NOTE: Since its so hard to get the total, real cosmos SDK gas cost from cosm_vm::mock_instance_with_gas_limit()
+# Im going to just write a script here that will call these contracts in a local chain running in the github action (if thats too much work I can transition it to using the testnet or something)
+
+on: [pull_request]
+
+name: Gas Costs Diff
+
+jobs:
+  # TODO: Once this is working also compile the new diff's contracts and write them to a different
+  #       folder in the action cache `./new-artifacts/*` or something.
+  compile-old-contracts:
+    name: Compile contracts using optimized rust compiler
+    runs-on: ubuntu-latest
+    container:
+      image: cosmwasm/rust-optimizer:0.12.5
+      options:
+        --platform linux/amd64
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.pull_request.base.ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+      - name: Compile contracts
+        run: /usr/local/bin/optimize.sh .
+      - name: Ls artifacts debug
+        run: ls -la ./artifacts
+      - name: Store contracts in cache
+        id: old-contracts-cache
+        uses: actions/cache@v1
+        with:
+          path: artifacts
+          key: artifacts-old-contracts
+
+  calc-gas-costs:
+    name: Calculate gas costs in local juno-net
+    runs-on: ubuntu-latest
+    needs: [compile-old-contracts]
+    container:
+      image:  ghcr.io/cosmoscontracts/juno:v2.3.0-beta.1
+      ports:
+        - 1317:1317
+        - 26656:26656
+        - 26657:26657
+      env:
+        PASSWORD: xxxxxxxxx
+        STAKE_TOKEN: ujunox
+        GAS_LIMIT: -1
+        UNSAFE_CORS: true
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v2
+      - name: Restore old contracts from cache
+        uses: actions/cache@v1
+        with:
+          # TODO: Write this to `old-artifacts`
+          path: artifacts
+          key: artifacts-old-contracts
+      - name: Debug artifacts
+        run: ls -la artifacts
+      - name: Install deps
+        run: apk --no-cache add curl jq
+      - name: Setup Juno Node
+        run: cd /opt && /opt/setup_and_run.sh juno10j9gpw9t4jsz47qgnkvl5n3zlm2fz72k67rxsg > /dev/null 2>&1 &
+      - name: Calculate gas costs
+        run: ./scripts/calc_gas.sh juno10j9gpw9t4jsz47qgnkvl5n3zlm2fz72k67rxsg
+
+  #post-diff:
+  #  name: Comment Gas Diff To PR
+  #  runs-on: ubuntu-latest
+  #  needs: [calc-current-gas, calc-new-gas]
+  #
+  # TODO: 
+  # * Use github action cache to store the gas cost https://github.com/actions/cache#example-workflow
+  # * https://github.com/actions/github-script#comment-on-an-issue
+
+
+
