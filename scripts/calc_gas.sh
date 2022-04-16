@@ -26,6 +26,7 @@ CW20_CODE=$(echo xxxxxxxxx | $BINARY tx wasm store "cw20_base.wasm" --from valid
 
 ### CW-DAO ###
 CW3_DAO_CODE=$(echo xxxxxxxxx | $BINARY tx wasm store "artifacts/cw3_dao.wasm" --from validator $TXFLAG --output json | jq -r '.logs[0].events[-1].attributes[0].value')
+CW3_DAO_OLD_CODE=$(echo xxxxxxxxx | $BINARY tx wasm store "artifacts-old/cw3_dao.wasm" --from validator $TXFLAG --output json | jq -r '.logs[0].events[-1].attributes[0].value')
 
 ### CW3-MULTISIG ###
 CW3_MULTISIG_CODE=$(echo xxxxxxxxx | $BINARY tx wasm store "artifacts/cw3_multisig.wasm" --from validator $TXFLAG --output json | jq -r '.logs[0].events[-1].attributes[0].value')
@@ -86,4 +87,7 @@ echo $CW3_DAO_INIT | jq .
 
 GAS_USED=$(echo xxxxxxxxx | $BINARY tx wasm instantiate "$CW3_DAO_CODE" "$CW3_DAO_INIT" --from validator --label "DAO DAO" $TXFLAG --output json --no-admin | jq -r '.gas_used')
 
-echo "CW3_DAO_INIT gas used: $GAS_USED"
+echo "CW3_DAO_INIT gas used (new commit): $GAS_USED"
+
+GAS_USED=$(echo xxxxxxxxx | $BINARY tx wasm instantiate "$CW3_DAO_OLD_CODE" "$CW3_DAO_INIT" --from validator --label "DAO DAO" $TXFLAG --output json --no-admin | jq -r '.gas_used')
+echo "CW3_DAO_INIT gas used (old commit): $GAS_USED"
