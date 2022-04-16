@@ -1,5 +1,7 @@
 #!/bin/sh
 
+# TODO: Base this off of v1 branch
+
 # Calculate Gas Costs for all contracts
 BINARY='junod'
 DENOM='ujunox'
@@ -85,9 +87,10 @@ CW3_DAO_INIT='{
 }'
 echo $CW3_DAO_INIT | jq .
 
+GAS_USED=$(echo xxxxxxxxx | $BINARY tx wasm instantiate "$CW3_DAO_OLD_CODE" "$CW3_DAO_INIT" --from validator --label "DAO DAO" $TXFLAG --output json --no-admin | jq -r '.gas_used')
+echo "CW3_DAO_INIT gas used (old commit): $GAS_USED"
+
 GAS_USED=$(echo xxxxxxxxx | $BINARY tx wasm instantiate "$CW3_DAO_CODE" "$CW3_DAO_INIT" --from validator --label "DAO DAO" $TXFLAG --output json --no-admin | jq -r '.gas_used')
 
 echo "CW3_DAO_INIT gas used (new commit): $GAS_USED"
 
-GAS_USED=$(echo xxxxxxxxx | $BINARY tx wasm instantiate "$CW3_DAO_OLD_CODE" "$CW3_DAO_INIT" --from validator --label "DAO DAO" $TXFLAG --output json --no-admin | jq -r '.gas_used')
-echo "CW3_DAO_INIT gas used (old commit): $GAS_USED"

@@ -79,15 +79,23 @@ jobs:
         run: cd /opt && /opt/setup_and_run.sh juno10j9gpw9t4jsz47qgnkvl5n3zlm2fz72k67rxsg > /dev/null 2>&1 &
       - name: Calculate gas costs
         run: ./scripts/calc_gas.sh juno10j9gpw9t4jsz47qgnkvl5n3zlm2fz72k67rxsg
-
-  #post-diff:
-  #  name: Comment Gas Diff To PR
-  #  runs-on: ubuntu-latest
-  #  needs: [calc-current-gas, calc-new-gas]
-  #
-  # TODO: 
-  # * Use github action cache to store the gas cost https://github.com/actions/cache#example-workflow
-  # * https://github.com/actions/github-script#comment-on-an-issue
+      - name: Post Diff to PR
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `![gas](https://liquipedia.net/commons/images/thumb/7/7e/Scr-gas-t.png/40px-Scr-gas-t.png) Gas Diff Report ![gas](https://liquipedia.net/commons/images/thumb/7/7e/Scr-gas-t.png/40px-Scr-gas-t.png)
+                 * cw3_dao.wasm:
+                   * Instatiate:
+                     * ${{ github.event.pull_request.base.ref }}: 464427
+                     * ${{ github.sha }}: 464403
+                   * ExecuteMsg: TODO
+                   * Query: TODO
+                `
+            })
 
 
 
