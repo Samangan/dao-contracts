@@ -25,6 +25,9 @@ curl -LO https://github.com/CosmWasm/cw-plus/releases/download/v0.11.1/cw4_group
 CW20_CODE=$(echo xxxxxxxxx | $BINARY tx wasm store "cw20_base.wasm" --from validator $TXFLAG --output json | jq -r '.logs[0].events[-1].attributes[0].value')
 CW4_GROUP_CODE=$(echo xxxxxxxxx | $BINARY tx wasm store "cw4_group.wasm" --from validator $TXFLAG --output json | jq -r '.logs[0].events[-1].attributes[0].value')
 
+STAKE_CW20_CODE=$(echo xxxxxxxxx | $BINARY tx wasm store "artifacts/stake_cw20.wasm" --from validator $TXFLAG --output json | jq -r '.logs[0].events[-1].attributes[0].value')
+OLD_STAKE_CW20_CODE=$(echo xxxxxxxxx | $BINARY tx wasm store "artifacts-old/stake_cw20.wasm" --from validator $TXFLAG --output json | jq -r '.logs[0].events[-1].attributes[0].value')
+
 echo "TX Flags: $TXFLAG"
 
 #### CONTRACT GAS BENCHMARKING ####
@@ -38,12 +41,15 @@ do
   CONTRACT_CODE=$(echo xxxxxxxxx | $BINARY tx wasm store "artifacts/$CONTRACT_NAME.wasm" --from validator $TXFLAG --output json | jq -r '.logs[0].events[-1].attributes[0].value')
   OLD_CONTRACT_CODE=$(echo xxxxxxxxx | $BINARY tx wasm store "artifacts-old/$CONTRACT_NAME.wasm" --from validator $TXFLAG --output json | jq -r '.logs[0].events[-1].attributes[0].value')
 
-  # Instatiate old and new versions:
+  # Instatiate:
   INSTANTIATE_JSON=$(cat $CONTRACT/instantiate/*.json | sed -e s/\$CW20_CODE/$CW20_CODE/g -e s/\$ADDR/$ADDR/g -e s/\$STAKE_CW20_CODE/$STAKE_CW20_CODE/g | jq)
+  OLD_INSTANTIATE_JSON=$(cat $CONTRACT/instantiate/*.json | sed -e s/\$CW20_CODE/$CW20_CODE/g -e s/\$ADDR/$ADDR/g -e s/\$STAKE_CW20_CODE/$OLD_STAKE_CW20_CODE/g | jq)
+
   echo $INSTANTIATE_JSON | jq .
+  echo $OLD_INSTANTIATE_JSON | jq .
 
   GAS_USED=$(echo xxxxxxxxx | $BINARY tx wasm instantiate "$CONTRACT_CODE" "$INSTANTIATE_JSON" --from validator $TXFLAG --label "DAO DAO" --output json --no-admin | jq -r '.gas_used')
-  OLD_GAS_USED=$(echo xxxxxxxxx | $BINARY tx wasm instantiate "$OLD_CONTRACT_CODE" "$INSTANTIATE_JSON" --from validator $TXFLAG --label "DAO DAO" --output json --no-admin | jq -r '.gas_used')
+  OLD_GAS_USED=$(echo xxxxxxxxx | $BINARY tx wasm instantiate "$OLD_CONTRACT_CODE" "$OLD_INSTANTIATE_JSON" --from validator $TXFLAG --label "DAO DAO" --output json --no-admin | jq -r '.gas_used')
 
   mkdir -p gas_usage/$CONTRACT_NAME
   jq -n --arg n "$GAS_USED" --arg o "$OLD_GAS_USED" '{"pr": $n, "main": $o}' > gas_usage/$CONTRACT_NAME/instatiate.json

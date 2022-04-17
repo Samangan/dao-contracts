@@ -105,8 +105,8 @@ jobs:
                   }
 
                   files.forEach(function (file, index) {
-                    console.log("Loading: " + files);
-                    fs.readFile(file, 'utf8' , (err, data) => {
+                    console.log("Loading: " + file);
+                    fs.readFile(`./gas_usage/${contract_dir}/${file}`, 'utf8' , (err, data) => {
                       if (err) {
                         console.error(err)
                         return
