@@ -87,8 +87,8 @@ jobs:
               * cw3_dao.wasm:
                 * Instatiate:
                   * Change: -0.00 %
-                  * [main: ${{ github.event.pull_request.base.sha }}]: 464427
-                  * [PR: ${{ github.sha }}]: 464403
+                  * main: ${{ github.event.pull_request.base.sha }}: 464427
+                  * PR: ${{ github.sha }}: 464403
                 * ExecuteMsg: TODO
                 * Query: TODO
             `;
