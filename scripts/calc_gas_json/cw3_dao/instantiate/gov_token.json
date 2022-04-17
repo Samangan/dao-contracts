@@ -12,7 +12,7 @@
         "decimals": 6,
         "initial_balances": [
           {
-            "address": "'$ADDR'",
+            "address": "$ADDR",
             "amount": "1000000000"
           }
         ]
