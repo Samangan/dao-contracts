@@ -84,11 +84,11 @@ jobs:
         with:
           script: |
             const commentBody = `![gas](https://liquipedia.net/commons/images/thumb/7/7e/Scr-gas-t.png/20px-Scr-gas-t.png) ~ Gas Diff Report ~ ![gas](https://liquipedia.net/commons/images/thumb/7/7e/Scr-gas-t.png/20px-Scr-gas-t.png)
-              * cw3_dao.wasm Gas Usage:
+              * cw3_dao.wasm:
                 * Instatiate:
-                  * ${{ github.event.pull_request.base.sha }}: 464427
-                  * ${{ github.sha }}: 464403
                   * Change: -0.00 %
+                  * [main: ${{ github.event.pull_request.base.sha }}]: 464427
+                  * [PR: ${{ github.sha }}]: 464403
                 * ExecuteMsg: TODO
                 * Query: TODO
             `;
@@ -116,6 +116,4 @@ jobs:
                 body: commentBody
               });
             }
-
-
 
