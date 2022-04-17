@@ -32,7 +32,7 @@ echo "TX Flags: $TXFLAG"
 
 #### CONTRACT GAS BENCHMARKING ####
 
-for CONTRACT in ./scripts/calc_gas_json/*/
+for CONTRACT in ./scripts/calc_gas/msg_json/*/
 do
   CONTRACT_NAME=`basename $CONTRACT`
   echo "Processing Contract: $CONTRACT_NAME"

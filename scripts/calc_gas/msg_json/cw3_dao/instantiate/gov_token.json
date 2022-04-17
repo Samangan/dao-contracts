@@ -3,7 +3,7 @@
   "description": "A DAO that makes DAO tooling",
   "gov_token": {
     "instantiate_new_cw20": {
-      "cw20_code_id": "$CW20_CODE",
+      "cw20_code_id": $CW20_CODE,
       "label": "DAO DAO v0.1.1",
       "initial_dao_balance": "1000000000",
       "msg": {
@@ -21,7 +21,7 @@
   },
   "staking_contract": {
     "instantiate_new_staking_contract": {
-      "staking_contract_code_id": "$STAKE_CW20_CODE"
+      "staking_contract_code_id": $STAKE_CW20_CODE
     }
   },
   "threshold": {
