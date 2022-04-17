@@ -29,10 +29,10 @@ echo "TX Flags: $TXFLAG"
 
 for CONTRACT in ./scripts/calc_gas_json/*/
 do
-  echo "Processing Contract: $CONTRACT"
+  CONTRACT_NAME=`basename $CONTRACT`
+  echo "Processing Contract: $CONTRACT_NAME"
 
   # Store old and new versions:
-  CONTRACT_NAME=`basename $CONTRACT`
   CONTRACT_CODE=$(echo xxxxxxxxx | $BINARY tx wasm store "artifacts/$CONTRACT_NAME.wasm" --from validator $TXFLAG --output json | jq -r '.logs[0].events[-1].attributes[0].value')
   OLD_CONTRACT_CODE=$(echo xxxxxxxxx | $BINARY tx wasm store "artifacts-old/$CONTRACT_NAME.wasm" --from validator $TXFLAG --output json | jq -r '.logs[0].events[-1].attributes[0].value')
 
@@ -41,12 +41,15 @@ do
   INSTANTIATE_JSON=`cat $CONTRACT/instantiate/*.json | jq`
   echo $INSTANTIATE_JSON | jq .
 
-  # TODO: write the gas used to an output file, instead of just echoing
+  mkdir -p gas_usage/$CONTRACT_NAME
+
   GAS_USED=$(echo xxxxxxxxx | $BINARY tx wasm instantiate "$CONTRACT_CODE" "$INSTANTIATE_JSON" --from validator $TXFLAG --label "DAO DAO" --output json --no-admin | jq -r '.gas_used')
   echo "$CONTRACT_NAME gas used (new commit): $GAS_USED"
 
   OLD_GAS_USED=$(echo xxxxxxxxx | $BINARY tx wasm instantiate "$OLD_CONTRACT_CODE" "$INSTANTIATE_JSON" --from validator $TXFLAG --label "DAO DAO" --output json --no-admin | jq -r '.gas_used')
   echo "$CONTRACT_NAME gas used (old commit): $OLD_GAS_USED"
+
+  jq -n --arg n "$GAS_USED" --arg o "$OLD_GAS_USED" '{"pr": $n, "main": $o}' > gas_usage/$CONTRACT_NAME/instatiate.json
 
   # TODO: Execute
 
