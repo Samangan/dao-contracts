@@ -3,6 +3,7 @@
 # TODO: Base this off of v1 branch
 
 # Calculate Gas Costs for all contracts
+
 BINARY='junod'
 DENOM='ujunox'
 CHAIN_ID='testing'
@@ -17,6 +18,7 @@ echo "Address to deploy contracts: $ADDR"
 sleep 60
 
 ##### UPLOAD DEPENDENCIES #####
+
 curl -LO https://github.com/CosmWasm/cw-plus/releases/download/v0.11.1/cw20_base.wasm
 curl -LO https://github.com/CosmWasm/cw-plus/releases/download/v0.11.1/cw4_group.wasm
 
@@ -37,8 +39,7 @@ do
   OLD_CONTRACT_CODE=$(echo xxxxxxxxx | $BINARY tx wasm store "artifacts-old/$CONTRACT_NAME.wasm" --from validator $TXFLAG --output json | jq -r '.logs[0].events[-1].attributes[0].value')
 
   # Instatiate old and new versions:
-  # TODO: Support multiple instatiate json files
-  INSTANTIATE_JSON=`cat $CONTRACT/instantiate/*.json | jq`
+  INSTANTIATE_JSON=`cat $CONTRACT/instantiate/*.json | sed -e s/\$CW20_CODE/$CW20_CODE/g -e s/\$ADDR/$ADDR/g -e s/\$STAKE_CW20_CODE/$STAKE_CW20_CODE/g jq`
   echo $INSTANTIATE_JSON | jq .
 
   mkdir -p gas_usage/$CONTRACT_NAME
