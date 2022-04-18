@@ -2,7 +2,7 @@ const fs = require('fs');
 
 module.exports = async ({ github, context, core }) => {
   const gasUsage = getGasUsage();
-  const commentBody = buildComment(gasUsage);
+  const commentBody = buildComment(github, gasUsage);
 
   const { data: comments } = await github.rest.issues.listComments({
     issue_number: context.issue.number,
@@ -65,11 +65,14 @@ function getGasUsage() {
     });
   });
 
-  console.log(gasUsage);
+  console.log(`gasUsage: ${gasUsage}`);
+
   return gasUsage;
 }
 
-function buildComment(gasUsage) {
+function buildComment(github, gasUsage) {
+  console.log(`buildComment() - gasUsage: ${gasUsage}`);
+
   const commentHeader = `
     ![gas](https://liquipedia.net/commons/images/thumb/7/7e/Scr-gas-t.png/20px-Scr-gas-t.png) 
         ~ Gas Diff Report ~ 
