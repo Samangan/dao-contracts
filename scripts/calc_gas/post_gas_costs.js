@@ -65,14 +65,12 @@ function getGasUsage() {
     });
   });
 
-  console.log(`gasUsage: ${gasUsage}`);
+  console.log(JSON.stringify(gasUsage));
 
   return gasUsage;
 }
 
 function buildComment(github, gasUsage) {
-  console.log(`buildComment() - gasUsage: ${gasUsage}`);
-
   const commentHeader = `
     ![gas](https://liquipedia.net/commons/images/thumb/7/7e/Scr-gas-t.png/20px-Scr-gas-t.png) 
         ~ Gas Diff Report ~ 
