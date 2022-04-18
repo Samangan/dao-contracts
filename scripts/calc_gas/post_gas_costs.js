@@ -46,13 +46,17 @@ function getGasUsage() {
           return
         }
 
+        gasUsage[contractDir] = {};
+
         files.forEach(function (file, index) {
           console.log("Loading: " + file);
+
           fs.readFile(`./gas_usage/${contractDir}/${file}`, 'utf8', (err, data) => {
             if (err) {
               console.error(err)
               return
             }
+
             console.log(data)
             gasUsage[contractDir][file] = JSON.parse(data);
           });
