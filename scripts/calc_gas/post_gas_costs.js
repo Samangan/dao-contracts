@@ -70,11 +70,11 @@ function getGasUsage() {
 }
 
 function buildComment(gasUsage) {
-  const commentHeader = ```
+  const commentHeader = `
     ![gas](https://liquipedia.net/commons/images/thumb/7/7e/Scr-gas-t.png/20px-Scr-gas-t.png) 
         ~ Gas Diff Report ~ 
     ![gas](https://liquipedia.net/commons/images/thumb/7/7e/Scr-gas-t.png/20px-Scr-gas-t.png)
-  ```;
+  `;
 
   var commentData = "";
   for (var contract in gasUsage) {
