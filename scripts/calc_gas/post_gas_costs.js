@@ -31,41 +31,21 @@ module.exports = async ({ github, context, core }) => {
 
 function getGasUsage() {
   var gasUsage = {};
-  fs.readdir("./gas_usage/", function (err, contractDirs) {
-    if (err) {
-      console.error("Error reading gas_usage dir:", err);
-      return
-    }
 
-    contractDirs.forEach(function (contractDir, index) {
-      console.log("Processing: " + contractDir);
+  const contractDirs = fs.readdirSync("./gas_usage/");
 
-      fs.readdir(`./gas_usage/${contractDir}`, function (err, files) {
-        if (err) {
-          console.error("Error reading " + contractDir, err);
-          return
-        }
+  contractDirs.forEach(function (contractDir) {
+    console.log(`Processing ${contractDir}`);
+    gasUsage[contractDir] = {};
 
-        gasUsage[contractDir] = {};
+    const files = fs.readdirSync(`./gas_usage/${contractDir}`);
+    files.forEach(function (file) {
+      console.log(`Loading: ${file}`);
 
-        files.forEach(function (file, index) {
-          console.log("Loading: " + file);
-
-          fs.readFile(`./gas_usage/${contractDir}/${file}`, 'utf8', (err, data) => {
-            if (err) {
-              console.error(err)
-              return
-            }
-
-            console.log(data)
-            gasUsage[contractDir][file] = JSON.parse(data);
-          });
-        });
-      });
+      const data = fs.readFileSync(`./gas_usage/${contractDir}/${file}`, 'utf8');
+      gasUsage[contractDir][file] = JSON.parse(data);
     });
   });
-
-  console.log(JSON.stringify(gasUsage));
 
   return gasUsage;
 }
