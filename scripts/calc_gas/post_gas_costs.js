@@ -1,8 +1,8 @@
 const fs = require('fs');
 
-module.exports = async ({ github, context, core }) => {
+module.exports = async ({ github, context, baseSha, sha }) => {
   const gasUsage = getGasUsage();
-  const commentBody = buildComment(github, gasUsage);
+  const commentBody = buildComment(gasUsage, baseSha, sha);
 
   const { data: comments } = await github.rest.issues.listComments({
     issue_number: context.issue.number,
@@ -50,7 +50,7 @@ function getGasUsage() {
   return gasUsage;
 }
 
-function buildComment(github, gasUsage) {
+function buildComment(gasUsage, baseSha, sha) {
   const commentHeader = `
     ![gas](https://liquipedia.net/commons/images/thumb/7/7e/Scr-gas-t.png/20px-Scr-gas-t.png) 
         ~ Gas Diff Report ~ 
@@ -68,8 +68,8 @@ function buildComment(github, gasUsage) {
 
       commentData += `    * ${f}:` + '\n';
       commentData += `      * Change: ${pctChange}%` + '\n';
-      commentData += `      * main: ${github.event.pull_request.base.sha}: ${mainUsage} ` + '\n';
-      commentData += `      * PR: ${github.sha}: ${prUsage}` + '\n\n';
+      commentData += `      * main: ${baseSha}: ${mainUsage} ` + '\n';
+      commentData += `      * PR: ${sha}: ${prUsage}` + '\n\n';
     }
   }
 

@@ -86,4 +86,4 @@ jobs:
         with:
           script: |
             const script = require('./scripts/calc_gas/post_gas_costs.js')
-            await script({github, context, core})
+            await script({github, context, ${{ github.event.pull_request.base.sha }}, ${{ github.sha }} })
