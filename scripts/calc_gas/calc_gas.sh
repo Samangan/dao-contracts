@@ -31,6 +31,7 @@ OLD_STAKE_CW20_CODE=$(echo xxxxxxxxx | $BINARY tx wasm store "artifacts-old/stak
 echo "TX Flags: $TXFLAG"
 
 #### CONTRACT GAS BENCHMARKING ####
+# TODO: Clean this all up once its working
 
 for CONTRACT in ./scripts/calc_gas/msg_json/*/
 do
@@ -59,6 +60,12 @@ do
 
   echo $CONTRACT_ID
   echo $OLD_CONTRACT_ID
+
+  # Send some coins to the dao contract to initializae its
+  # treasury. Unless this is done the DAO will be unable to perform
+  # actions like executing proposals that require it to pay gas fees.
+  $BINARY tx bank send validator $CONTRACT_ID 9000000$DENOM --chain-id testing $TXFLAG -y
+  $BINARY tx bank send validator $OLD_CONTRACT_ID 9000000$DENOM --chain-id testing $TXFLAG -y
 
   # TODO: Loop through multiple Execute json files once this is one is working
   EXECUTE_MSG="$CONTRACT/execute/propose.json"
