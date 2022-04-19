@@ -4,14 +4,16 @@
     "description": "Do I pay someone?",
     "msgs": [
       {
-        "send": {
-          "to_address": "$ADDR",
-          "amount": [
-            {
-              "amount": 1337,
-              "denom": "ujunox"
-            }
-          ]
+        "bank": {
+          "send": {
+            "to_address": "$ADDR",
+            "amount": [
+              {
+                "amount": 1337,
+                "denom": "ujunox"
+              }
+            ]
+          }
         }
       }
     ]
