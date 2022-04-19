@@ -45,16 +45,35 @@ do
   INSTANTIATE_JSON=$(cat $CONTRACT/instantiate/*.json | sed -e s/\$CW20_CODE/$CW20_CODE/g -e s/\$ADDR/$ADDR/g -e s/\$STAKE_CW20_CODE/$STAKE_CW20_CODE/g | jq)
   OLD_INSTANTIATE_JSON=$(cat $CONTRACT/instantiate/*.json | sed -e s/\$CW20_CODE/$CW20_CODE/g -e s/\$ADDR/$ADDR/g -e s/\$STAKE_CW20_CODE/$OLD_STAKE_CW20_CODE/g | jq)
 
-  echo $INSTANTIATE_JSON | jq .
-  echo $OLD_INSTANTIATE_JSON | jq .
-
   GAS_USED=$(echo xxxxxxxxx | $BINARY tx wasm instantiate "$CONTRACT_CODE" "$INSTANTIATE_JSON" --from validator $TXFLAG --label "DAO DAO" --output json --no-admin | jq -r '.gas_used')
   OLD_GAS_USED=$(echo xxxxxxxxx | $BINARY tx wasm instantiate "$OLD_CONTRACT_CODE" "$OLD_INSTANTIATE_JSON" --from validator $TXFLAG --label "DAO DAO" --output json --no-admin | jq -r '.gas_used')
 
   mkdir -p gas_usage/$CONTRACT_NAME
   jq -n --arg n "$GAS_USED" --arg o "$OLD_GAS_USED" '{"pr": $n, "main": $o}' > gas_usage/$CONTRACT_NAME/instatiate.json
 
-  # TODO: Execute
+  # Execute:
+  echo "Processing Execute Messages: "
+
+  CONTRACT=$(echo xxxxxxxxx | $BINARY query wasm list-contract-by-code $CONTRACT_CODE $NODE --output json | jq -r '.contracts[-1]')
+  OLD_CONTRACT=$(echo xxxxxxxxx | $BINARY query wasm list-contract-by-code $OLD_CONTRACT_CODE $NODE --output json | jq -r '.contracts[-1]')
+
+  echo $CONTRACT
+  echo $OLD_CONTRACT
+
+  for EXECUTE_MSG in $CONTRACT/execute/*/
+  do
+    EXECUTE_JSON=$(cat $EXECUTE_MSG | sed -e s/\$CW20_CODE/$CW20_CODE/g -e s/\$ADDR/$ADDR/g -e s/\$STAKE_CW20_CODE/$STAKE_CW20_CODE/g | jq)
+    OLD_EXECUTE_JSON=$(cat $EXECUTE_MSG | sed -e s/\$CW20_CODE/$CW20_CODE/g -e s/\$ADDR/$ADDR/g -e s/\$STAKE_CW20_CODE/$OLD_STAKE_CW20_CODE/g | jq)
+
+    echo $EXECUTE_JSON | jq .
+    echo $OLD_EXECUTE_JSON | jq .
+
+    GAS_USED=$(echo xxxxxxxxx | $BINARY tx wasm execute "$CONTRACT" "$EXECUTE_JSON" --from validator $TXFLAG --label "DAO DAO" --output json --no-admin | jq -r '.gas_used')
+    OLD_GAS_USED=$(echo xxxxxxxxx | $BINARY tx wasm execute "$OLD_CONTRACT" "$OLD_EXECUTE_JSON" --from validator $TXFLAG --label "DAO DAO" --output json --no-admin | jq -r '.gas_used')
+
+    FILE_NAME=`basename $EXECUTE_MSG`
+    jq -n --arg n "$GAS_USED" --arg o "$OLD_GAS_USED" '{"pr": $n, "main": $o}' > gas_usage/$CONTRACT_NAME/execute_$FILE_NAME.json
+  done
 
   # TODO: Query
 
