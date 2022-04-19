@@ -1,8 +1,8 @@
 const fs = require('fs');
 
-module.exports = async ({ github, context, baseSha, sha }) => {
+module.exports = async ({ github, context, core }) => {
   const gasUsage = getGasUsage();
-  const commentBody = buildComment(gasUsage, baseSha, sha);
+  const commentBody = buildComment(gasUsage, github.base_ref, github.sha);
 
   const { data: comments } = await github.rest.issues.listComments({
     issue_number: context.issue.number,
