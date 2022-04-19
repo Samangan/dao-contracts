@@ -60,16 +60,18 @@ do
   echo $CONTRACT_ID
   echo $OLD_CONTRACT_ID
 
-  for EXECUTE_MSG in $CONTRACTexecute/*/
+  for EXECUTE_MSG in $CONTRACTexecute/*.json
   do
+    echo "$EXECUTE_MSG"
+
     EXECUTE_JSON=$(cat $EXECUTE_MSG | sed -e s/\$CW20_CODE/$CW20_CODE/g -e s/\$ADDR/$ADDR/g -e s/\$STAKE_CW20_CODE/$STAKE_CW20_CODE/g | jq)
     OLD_EXECUTE_JSON=$(cat $EXECUTE_MSG | sed -e s/\$CW20_CODE/$CW20_CODE/g -e s/\$ADDR/$ADDR/g -e s/\$STAKE_CW20_CODE/$OLD_STAKE_CW20_CODE/g | jq)
 
     echo $EXECUTE_JSON | jq .
     echo $OLD_EXECUTE_JSON | jq .
 
-    GAS_USED=$(echo xxxxxxxxx | $BINARY tx wasm execute "$CONTRACT_ID" "$EXECUTE_JSON" --from validator $TXFLAG  --output json --no-admin | jq -r '.gas_used')
-    OLD_GAS_USED=$(echo xxxxxxxxx | $BINARY tx wasm execute "$OLD_CONTRACT_ID" "$OLD_EXECUTE_JSON" --from validator $TXFLAG --output json --no-admin | jq -r '.gas_used')
+    GAS_USED=$(echo xxxxxxxxx | $BINARY tx wasm execute "$CONTRACT_ID" "$EXECUTE_JSON" --from validator $TXFLAG  --output json | jq -r '.gas_used')
+    OLD_GAS_USED=$(echo xxxxxxxxx | $BINARY tx wasm execute "$OLD_CONTRACT_ID" "$OLD_EXECUTE_JSON" --from validator $TXFLAG --output json | jq -r '.gas_used')
 
     FILE_NAME=`basename $EXECUTE_MSG`
     jq -n --arg n "$GAS_USED" --arg o "$OLD_GAS_USED" '{"pr": $n, "main": $o}' > gas_usage/$CONTRACT_NAME/execute_$FILE_NAME.json
