@@ -1,17 +1,19 @@
 {
-  "title": "Give money",
-  "description": "Do I pay someone?",
-  "msgs": [
-    {
-      "send": {
-        "to_address": "$ADDR",
-        "amount": [
-          {
-            "amount": 1337,
-            "denom": "ujunox"
-          }
-        ]
+  "propose": {
+    "title": "Give money",
+    "description": "Do I pay someone?",
+    "msgs": [
+      {
+        "send": {
+          "to_address": "$ADDR",
+          "amount": [
+            {
+              "amount": 1337,
+              "denom": "ujunox"
+            }
+          ]
+        }
       }
-    }
-  ]
+    ]
+  }
 }
