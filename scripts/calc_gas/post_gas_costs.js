@@ -2,7 +2,7 @@ const fs = require('fs');
 
 module.exports = async ({ github, context, core }) => {
   const gasUsage = getGasUsage();
-  const commentBody = buildComment(gasUsage, github.base_ref, github.sha);
+  const commentBody = buildComment(gasUsage, github.base_ref, context.sha);
 
   const { data: comments } = await github.rest.issues.listComments({
     issue_number: context.issue.number,
@@ -51,11 +51,10 @@ function getGasUsage() {
 }
 
 function buildComment(gasUsage, baseSha, sha) {
-  const commentHeader = `
-    ![gas](https://liquipedia.net/commons/images/thumb/7/7e/Scr-gas-t.png/20px-Scr-gas-t.png) 
-        ~ Gas Diff Report ~ 
-    ![gas](https://liquipedia.net/commons/images/thumb/7/7e/Scr-gas-t.png/20px-Scr-gas-t.png)
-  `;
+  const commentHeader = " \
+  ![gas](https://liquipedia.net/commons/images/thumb/7/7e/Scr-gas-t.png/20px-Scr-gas-t.png) \
+  ~Gas Diff Report ~ \
+  ![gas](https://liquipedia.net/commons/images/thumb/7/7e/Scr-gas-t.png/20px-Scr-gas-t.png)";
 
   var commentData = "";
   for (var contract in gasUsage) {
