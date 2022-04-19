@@ -54,11 +54,11 @@ do
   # Execute:
   echo "Processing Execute Messages: "
 
-  CONTRACT=$(echo xxxxxxxxx | $BINARY query wasm list-contract-by-code $CONTRACT_CODE $NODE --output json | jq -r '.contracts[-1]')
-  OLD_CONTRACT=$(echo xxxxxxxxx | $BINARY query wasm list-contract-by-code $OLD_CONTRACT_CODE $NODE --output json | jq -r '.contracts[-1]')
+  CONTRACT_ID=$(echo xxxxxxxxx | $BINARY query wasm list-contract-by-code $CONTRACT_CODE $NODE --output json | jq -r '.contracts[-1]')
+  OLD_CONTRACT_ID=$(echo xxxxxxxxx | $BINARY query wasm list-contract-by-code $OLD_CONTRACT_CODE $NODE --output json | jq -r '.contracts[-1]')
 
-  echo $CONTRACT
-  echo $OLD_CONTRACT
+  echo $CONTRACT_ID
+  echo $OLD_CONTRACT_ID
 
   for EXECUTE_MSG in $CONTRACT/execute/*/
   do
@@ -68,8 +68,8 @@ do
     echo $EXECUTE_JSON | jq .
     echo $OLD_EXECUTE_JSON | jq .
 
-    GAS_USED=$(echo xxxxxxxxx | $BINARY tx wasm execute "$CONTRACT" "$EXECUTE_JSON" --from validator $TXFLAG --label "DAO DAO" --output json --no-admin | jq -r '.gas_used')
-    OLD_GAS_USED=$(echo xxxxxxxxx | $BINARY tx wasm execute "$OLD_CONTRACT" "$OLD_EXECUTE_JSON" --from validator $TXFLAG --label "DAO DAO" --output json --no-admin | jq -r '.gas_used')
+    GAS_USED=$(echo xxxxxxxxx | $BINARY tx wasm execute "$CONTRACT_ID" "$EXECUTE_JSON" --from validator $TXFLAG --label "DAO DAO" --output json --no-admin | jq -r '.gas_used')
+    OLD_GAS_USED=$(echo xxxxxxxxx | $BINARY tx wasm execute "$OLD_CONTRACT_ID" "$OLD_EXECUTE_JSON" --from validator $TXFLAG --label "DAO DAO" --output json --no-admin | jq -r '.gas_used')
 
     FILE_NAME=`basename $EXECUTE_MSG`
     jq -n --arg n "$GAS_USED" --arg o "$OLD_GAS_USED" '{"pr": $n, "main": $o}' > gas_usage/$CONTRACT_NAME/execute_$FILE_NAME.json
