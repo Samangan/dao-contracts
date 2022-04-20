@@ -43,7 +43,7 @@ instantiate() {
   GAS_USED=$(echo xxxxxxxxx | $BINARY tx wasm instantiate "$CODE" "$INSTANTIATE_JSON" --from validator $TXFLAG --label "DAO DAO" --output json --no-admin | jq -r '.gas_used')
 
   mkdir -p gas_usage/$CONTRACT_NAME/instantiate/
-  echo $GAS_USED > gas_usage/$CONTRACT_NAME/instatiate/$VERSION
+  echo $GAS_USED > gas_usage/$CONTRACT_NAME/instantiate/$VERSION
   echo $CODE
 }
 
