@@ -74,7 +74,7 @@ do
   CONTRACT_CODE=$(instantiate $CONTRACT_NAME "artifacts/$CONTRACT_NAME.wasm" $STAKE_CW20_CODE "pr")
   OLD_CONTRACT_CODE=$(instantiate $CONTRACT_NAME "artifacts-old/$CONTRACT_NAME.wasm" $OLD_STAKE_CW20_CODE "main")
 
-  $(execute $CONTRACT_CODE $STAKE_CW20_CODE "pr")
-  $(execute $OLD_CONTRACT_CODE $OLD_STAKE_CW20_CODE "main")
+  #$(execute $CONTRACT_CODE $STAKE_CW20_CODE "pr")
+  #$(execute $OLD_CONTRACT_CODE $OLD_STAKE_CW20_CODE "main")
 
 done
