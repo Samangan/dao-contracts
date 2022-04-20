@@ -66,10 +66,6 @@ execute() {
   echo $GAS_USED > gas_usage/$CONTRACT_NAME/execute_$FILE_NAME/$VERSION
 }
 
-query() {
-  # TODO
-}
-
 for CONTRACT in ./scripts/calc_gas/msg_json/*/
 do
   CONTRACT_NAME=`basename $CONTRACT`
