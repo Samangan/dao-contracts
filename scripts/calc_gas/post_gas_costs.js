@@ -38,12 +38,17 @@ function getGasUsage() {
     console.log(`Processing ${contractDir}`);
     gasUsage[contractDir] = {};
 
-    const files = fs.readdirSync(`./gas_usage/${contractDir}`);
-    files.forEach(function (file) {
-      console.log(`Loading: ${file}`);
+    const ops = fs.readdirSync(`./gas_usage/${contractDir}`);
+    ops.forEach(function (op) {
+      console.log(`Loading: ${op}`);
 
-      const data = fs.readFileSync(`./gas_usage/${contractDir}/${file}`, 'utf8');
-      gasUsage[contractDir][file] = JSON.parse(data);
+      const versions = fs.readdirSync(`./gas_usage/${contractDir}/${op}`);
+      gasUsage[contractDir][op] = {};
+
+      versions.forEach(function (version) {
+        const data = fs.readFileSync(`./gas_usage/${contractDir}/${file}`, 'utf8');
+        gasUsage[contractDir][op][version] = data;
+      });
     });
   });
 

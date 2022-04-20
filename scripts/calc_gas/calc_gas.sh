@@ -31,58 +31,54 @@ OLD_STAKE_CW20_CODE=$(echo xxxxxxxxx | $BINARY tx wasm store "artifacts-old/stak
 echo "TX Flags: $TXFLAG"
 
 #### CONTRACT GAS BENCHMARKING ####
-# TODO: Clean this all up once its working
+
+instantiate() {
+  CONTRACT_NAME=$1
+  WASM=$2
+  STAKE_CODE=$3
+  VERSION=$4
+
+  CODE=$(echo xxxxxxxxx | $BINARY tx wasm store $WASM --from validator $TXFLAG --output json | jq -r '.logs[0].events[-1].attributes[0].value')
+  INSTANTIATE_JSON=$(cat $CONTRACT/instantiate/*.json | sed -e s/\$CW20_CODE/$CW20_CODE/g -e s/\$ADDR/$ADDR/g -e s/\$STAKE_CW20_CODE/$STAKE_CODE/g | jq)
+  GAS_USED=$(echo xxxxxxxxx | $BINARY tx wasm instantiate "$CODE" "$INSTANTIATE_JSON" --from validator $TXFLAG --label "DAO DAO" --output json --no-admin | jq -r '.gas_used')
+
+  mkdir -p gas_usage/$CONTRACT_NAME/instantiate/
+  echo $GAS_USED > gas_usage/$CONTRACT_NAME/instatiate/$VERSION
+  echo $CODE
+}
+
+execute() {
+  CODE=$1
+  STAKE_CODE=$2
+  VERSION=$3
+
+  CONTRACT_ID=$(echo xxxxxxxxx | $BINARY query wasm list-contract-by-code $CODE $NODE --output json | jq -r '.contracts[-1]')
+  # Send some coins to the dao contract to init its treasury.
+  # Unless this is done the DAO will be unable to perform actions like executing proposals that require it to pay gas fees.
+  $BINARY tx bank send validator $CONTRACT_ID 9000000$DENOM --chain-id testing $TXFLAG -y
+
+  EXECUTE_MSG="$CONTRACT/execute/propose.json"
+  EXECUTE_JSON=$(cat $EXECUTE_MSG | sed -e s/\$CW20_CODE/$CW20_CODE/g -e s/\$ADDR/$ADDR/g -e s/\$STAKE_CW20_CODE/$STAKE_CODE/g | jq)
+  echo $EXECUTE_JSON | jq .
+  GAS_USED=$(echo xxxxxxxxx | $BINARY tx wasm execute "$CONTRACT_ID" "$EXECUTE_JSON" --from validator $TXFLAG  --output json | jq -r '.gas_used')
+
+  FILE_NAME=`basename $EXECUTE_MSG`
+  echo $GAS_USED > gas_usage/$CONTRACT_NAME/execute_$FILE_NAME/$VERSION
+}
+
+query() {
+  # TODO
+}
 
 for CONTRACT in ./scripts/calc_gas/msg_json/*/
 do
   CONTRACT_NAME=`basename $CONTRACT`
   echo "Processing Contract: $CONTRACT_NAME"
 
-  # Store old and new versions:
-  CONTRACT_CODE=$(echo xxxxxxxxx | $BINARY tx wasm store "artifacts/$CONTRACT_NAME.wasm" --from validator $TXFLAG --output json | jq -r '.logs[0].events[-1].attributes[0].value')
-  OLD_CONTRACT_CODE=$(echo xxxxxxxxx | $BINARY tx wasm store "artifacts-old/$CONTRACT_NAME.wasm" --from validator $TXFLAG --output json | jq -r '.logs[0].events[-1].attributes[0].value')
+  CONTRACT_CODE=$(instantiate $CONTRACT_NAME "artifacts/$CONTRACT_NAME.wasm" $STAKE_CW20_CODE "pr")
+  OLD_CONTRACT_CODE=$(instantiate $CONTRACT_NAME "artifacts-old/$CONTRACT_NAME.wasm" $OLD_STAKE_CW20_CODE "main")
 
-  # Instatiate:
-  INSTANTIATE_JSON=$(cat $CONTRACT/instantiate/*.json | sed -e s/\$CW20_CODE/$CW20_CODE/g -e s/\$ADDR/$ADDR/g -e s/\$STAKE_CW20_CODE/$STAKE_CW20_CODE/g | jq)
-  OLD_INSTANTIATE_JSON=$(cat $CONTRACT/instantiate/*.json | sed -e s/\$CW20_CODE/$CW20_CODE/g -e s/\$ADDR/$ADDR/g -e s/\$STAKE_CW20_CODE/$OLD_STAKE_CW20_CODE/g | jq)
-
-  GAS_USED=$(echo xxxxxxxxx | $BINARY tx wasm instantiate "$CONTRACT_CODE" "$INSTANTIATE_JSON" --from validator $TXFLAG --label "DAO DAO" --output json --no-admin | jq -r '.gas_used')
-  OLD_GAS_USED=$(echo xxxxxxxxx | $BINARY tx wasm instantiate "$OLD_CONTRACT_CODE" "$OLD_INSTANTIATE_JSON" --from validator $TXFLAG --label "DAO DAO" --output json --no-admin | jq -r '.gas_used')
-
-  mkdir -p gas_usage/$CONTRACT_NAME
-  jq -n --arg n "$GAS_USED" --arg o "$OLD_GAS_USED" '{"pr": $n, "main": $o}' > gas_usage/$CONTRACT_NAME/instatiate.json
-
-  # Execute:
-  echo "Processing Execute Messages: "
-
-  CONTRACT_ID=$(echo xxxxxxxxx | $BINARY query wasm list-contract-by-code $CONTRACT_CODE $NODE --output json | jq -r '.contracts[-1]')
-  OLD_CONTRACT_ID=$(echo xxxxxxxxx | $BINARY query wasm list-contract-by-code $OLD_CONTRACT_CODE $NODE --output json | jq -r '.contracts[-1]')
-
-  echo $CONTRACT_ID
-  echo $OLD_CONTRACT_ID
-
-  # Send some coins to the dao contract to initializae its
-  # treasury. Unless this is done the DAO will be unable to perform
-  # actions like executing proposals that require it to pay gas fees.
-  $BINARY tx bank send validator $CONTRACT_ID 9000000$DENOM --chain-id testing $TXFLAG -y
-  $BINARY tx bank send validator $OLD_CONTRACT_ID 9000000$DENOM --chain-id testing $TXFLAG -y
-
-  # TODO: Loop through multiple Execute json files once this is one is working
-  EXECUTE_MSG="$CONTRACT/execute/propose.json"
-
-  EXECUTE_JSON=$(cat $EXECUTE_MSG | sed -e s/\$CW20_CODE/$CW20_CODE/g -e s/\$ADDR/$ADDR/g -e s/\$STAKE_CW20_CODE/$STAKE_CW20_CODE/g | jq)
-  OLD_EXECUTE_JSON=$(cat $EXECUTE_MSG | sed -e s/\$CW20_CODE/$CW20_CODE/g -e s/\$ADDR/$ADDR/g -e s/\$STAKE_CW20_CODE/$OLD_STAKE_CW20_CODE/g | jq)
-
-  echo $EXECUTE_JSON | jq .
-  echo $OLD_EXECUTE_JSON | jq .
-
-  GAS_USED=$(echo xxxxxxxxx | $BINARY tx wasm execute "$CONTRACT_ID" "$EXECUTE_JSON" --from validator $TXFLAG  --output json | jq -r '.gas_used')
-  OLD_GAS_USED=$(echo xxxxxxxxx | $BINARY tx wasm execute "$OLD_CONTRACT_ID" "$OLD_EXECUTE_JSON" --from validator $TXFLAG --output json | jq -r '.gas_used')
-
-  FILE_NAME=`basename $EXECUTE_MSG`
-  jq -n --arg n "$GAS_USED" --arg o "$OLD_GAS_USED" '{"pr": $n, "main": $o}' > gas_usage/$CONTRACT_NAME/execute_$FILE_NAME.json
-
-
-  # TODO: Query
+  $(execute $CONTRACT_CODE $STAKE_CW20_CODE "pr")
+  $(execute $OLD_CONTRACT_CODE $OLD_STAKE_CW20_CODE "main")
 
 done
