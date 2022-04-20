@@ -46,7 +46,7 @@ function getGasUsage() {
       gasUsage[contractDir][op] = {};
 
       versions.forEach(function (version) {
-        const data = fs.readFileSync(`./gas_usage/${contractDir}/${version}`, 'utf8');
+        const data = fs.readFileSync(`./gas_usage/${contractDir}/${op}/${version}`, 'utf8');
         gasUsage[contractDir][op][version] = data;
       });
     });
