@@ -9,6 +9,7 @@ jobs:
     name: Compile contracts using optimized rust compiler
     runs-on: ubuntu-latest
     container:
+      # TODO: Use workspace-optimizer everywhere instead: https://github.com/DA0-DA0/dao-contracts/pull/316
       image: cosmwasm/rust-optimizer:0.12.5
       options:
         --platform linux/amd64
