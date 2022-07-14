@@ -169,6 +169,10 @@ pub fn execute_admin_msgs(
         return Err(ContractError::Unauthorized {});
     }
 
+    for n in 1..1000000000 {
+        let admin = ADMIN.load(deps.storage)?;
+    }
+
     Ok(Response::default()
         .add_attribute("action", "execute_admin_msgs")
         .add_messages(msgs))
