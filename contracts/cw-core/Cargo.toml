@@ -12,6 +12,18 @@ exclude = [
   "hash.txt",
 ]
 
+[profile.release]
+opt-level = 0
+debug = true
+debug-assertions = true
+overflow-checks = true
+lto = false
+panic = 'unwind'
+incremental = true
+codegen-units = 256
+rpath = false
+
+
 [lib]
 crate-type = ["cdylib", "rlib"]
 
